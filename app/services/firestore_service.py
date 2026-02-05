@@ -1,11 +1,14 @@
 """Generic Firestore write operations."""
 
+import logging
 from datetime import datetime
 from typing import Any
 
 from firebase_admin import firestore
 
 from app.core.firebase import get_firestore
+
+logger = logging.getLogger("app.services.firestore")
 
 
 def _ensure_dict(data: dict[str, Any]) -> dict[str, Any]:
@@ -43,6 +46,7 @@ def set_document(
     ref = client.collection(collection).document(document_id)
     payload = _ensure_dict(dict(data))
     ref.set(payload, merge=merge)
+    logger.info("set_document collection=%s id=%s", collection, document_id)
     return document_id
 
 
@@ -57,6 +61,7 @@ def add_document(collection: str, data: dict[str, Any]) -> str:
     ref = client.collection(collection).document()
     payload = _ensure_dict(dict(data))
     ref.set(payload)
+    logger.info("add_document collection=%s id=%s", collection, ref.id)
     return ref.id
 
 
@@ -75,6 +80,7 @@ def update_document(
     ref = client.collection(collection).document(document_id)
     payload = _ensure_dict(dict(data))
     ref.update(payload)
+    logger.info("update_document collection=%s id=%s", collection, document_id)
 
 
 def delete_document(collection: str, document_id: str) -> None:
@@ -85,6 +91,7 @@ def delete_document(collection: str, document_id: str) -> None:
     """
     client = get_firestore()
     client.collection(collection).document(document_id).delete()
+    logger.info("delete_document collection=%s id=%s", collection, document_id)
 
 
 def get_document(collection: str, document_id: str) -> dict[str, Any] | None:
@@ -96,9 +103,11 @@ def get_document(collection: str, document_id: str) -> dict[str, Any] | None:
     ref = client.collection(collection).document(document_id)
     doc = ref.get()
     if not doc.exists:
+        logger.info("get_document not found collection=%s id=%s", collection, document_id)
         return None
     data = doc.to_dict()
     data["id"] = doc.id
+    logger.info("get_document found collection=%s id=%s", collection, document_id)
     return data
 
 
@@ -108,7 +117,8 @@ def list_documents(collection: str) -> list[dict[str, Any]]:
     :return: List of documents (each with id in the dict).
     """
     client = get_firestore()
-    docs = client.collection(collection).stream()
+    docs = list(client.collection(collection).stream())
+    logger.info("list_documents collection=%s count=%d", collection, len(docs))
     return [{"id": d.id, **d.to_dict()} for d in docs]
 
 
@@ -126,6 +136,14 @@ def list_documents_where(
     :return: List of documents (each with id in the dict).
     """
     client = get_firestore()
+    logger.info(
+        "list_documents_where collection=%s field=%s value=%s order_by=%s descending=%s",
+        collection,
+        field,
+        value,
+        order_by,
+        descending,
+    )
     query = client.collection(collection).where(field, "==", value)
     if order_by:
         direction = firestore.Query.DESCENDING if descending else firestore.Query.ASCENDING

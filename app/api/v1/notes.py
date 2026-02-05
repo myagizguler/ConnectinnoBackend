@@ -1,10 +1,14 @@
 """Notes API - CRUD using Firestore, scoped by Firebase Auth user."""
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Path
 
 from app.core.auth import get_current_user_uid
 from app.models.note import NoteCreate, NoteResponse, NoteUpdate
 from app.services import note_firestore_service
+
+logger = logging.getLogger("app.api.notes")
 
 router = APIRouter()
 
@@ -12,8 +16,17 @@ router = APIRouter()
 @router.get("", response_model=list[NoteResponse])
 async def list_notes(user_id: str = Depends(get_current_user_uid)):
     """List user's notes."""
-    result = note_firestore_service.list_notes(user_id)
-    return [_note_to_response(n) for n in result]
+    logger.info("GET /notes start user_id=%s", user_id)
+    try:
+        result = note_firestore_service.list_notes(user_id)
+        logger.info("GET /notes success user_id=%s count=%d", user_id, len(result))
+        return [_note_to_response(n) for n in result]
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("GET /notes failed for user_id=%s: %s", user_id, exc)
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while listing notes",
+        ) from exc
 
 
 @router.post("", response_model=NoteResponse, status_code=201)
