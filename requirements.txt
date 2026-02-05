@@ -1,0 +1,13 @@
+# FastAPI & Server
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# Firebase
+firebase-admin>=6.6.0
+
+# Environment & Validation
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
+
+# Optional: async HTTP
+httpx>=0.28.0

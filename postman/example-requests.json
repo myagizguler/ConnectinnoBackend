@@ -1,0 +1,90 @@
+{
+  "description": "Copy these into Postman or any HTTP client. For Notes API: first run Register or Sign In, copy idToken, then use it as Authorization: Bearer <idToken>.",
+  "auth_via_this_api": {
+    "register": {
+      "method": "POST",
+      "url": "http://localhost:8000/register",
+      "headers": { "Content-Type": "application/json" },
+      "body": {
+        "email": "test@example.com",
+        "password": "password123",
+        "display_name": "Test User"
+      },
+      "note": "Response contains id_token – use in Notes API as Authorization: Bearer <id_token>."
+    },
+    "login": {
+      "method": "POST",
+      "url": "http://localhost:8000/login",
+      "headers": { "Content-Type": "application/json" },
+      "body": {
+        "email": "test@example.com",
+        "password": "password123"
+      },
+      "note": "Response contains id_token – use in Notes API."
+    }
+  },
+  "requests": {
+    "GET /notes - List notes": {
+      "method": "GET",
+      "url": "http://localhost:8000/notes",
+      "headers": {
+        "Authorization": "Bearer YOUR_FIREBASE_ID_TOKEN",
+        "Content-Type": "application/json"
+      },
+      "body": null
+    },
+    "POST /notes - Create note": {
+      "method": "POST",
+      "url": "http://localhost:8000/notes",
+      "headers": {
+        "Authorization": "Bearer YOUR_FIREBASE_ID_TOKEN",
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "title": "My first note",
+        "content": "This is the note content. You can write longer text here.",
+        "tags": ["work", "ideas"]
+      }
+    },
+    "PUT /notes/{id} - Update note": {
+      "method": "PUT",
+      "url": "http://localhost:8000/notes/REPLACE_WITH_NOTE_ID",
+      "headers": {
+        "Authorization": "Bearer YOUR_FIREBASE_ID_TOKEN",
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "title": "Updated title",
+        "content": "Updated content. Send only fields you want to change.",
+        "tags": ["work", "ideas", "updated"]
+      }
+    },
+    "DELETE /notes/{id} - Delete note": {
+      "method": "DELETE",
+      "url": "http://localhost:8000/notes/REPLACE_WITH_NOTE_ID",
+      "headers": {
+        "Authorization": "Bearer YOUR_FIREBASE_ID_TOKEN"
+      },
+      "body": null
+    }
+  },
+  "minimal_bodies": {
+    "POST (minimal - title only)": {
+      "title": "Minimal note"
+    },
+    "POST (with all fields)": {
+      "title": "Full note",
+      "content": "Content here.",
+      "tags": ["tag1", "tag2"]
+    },
+    "PUT (only title)": {
+      "title": "New title only"
+    },
+    "PUT (only content)": {
+      "content": "New content only"
+    },
+    "PUT (only tags)": {
+      "tags": ["solo-tag"]
+    }
+  }
+}

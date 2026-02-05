@@ -1,0 +1,129 @@
+{
+  "info": {
+    "name": "Connectinno Notes API",
+    "description": "1) POST /register or POST /login → copy id_token from response. 2) Set variable firebase_id_token = that id_token. 3) Use Notes requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "firebase_id_token", "value": "YOUR_ID_TOKEN_FROM_REGISTER_OR_LOGIN" },
+    { "key": "note_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"display_name\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": ["{{base_url}}"],
+              "path": ["register"]
+            },
+            "description": "Create a new user. Response contains id_token – copy it and set collection variable 'firebase_id_token' to use Notes API. If email exists, use Login instead."
+          }
+        },
+        {
+          "name": "2. Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Login with email and password. Copy id_token from response and set variable 'firebase_id_token'."
+          }
+        }
+      ],
+      "description": "Run Register once to create account (or Login if you already have one). Set firebase_id_token from response id_token."
+    },
+    {
+      "name": "List notes",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{firebase_id_token}}", "type": "text" },
+          { "key": "Content-Type", "value": "application/json", "type": "text" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/notes",
+          "host": ["{{base_url}}"],
+          "path": ["notes"]
+        },
+        "description": "List all notes for the current user."
+      }
+    },
+    {
+      "name": "Create note",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{firebase_id_token}}", "type": "text" },
+          { "key": "Content-Type", "value": "application/json", "type": "text" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"My first note\",\n  \"content\": \"This is the note content. You can write longer text here.\",\n  \"tags\": [\"work\", \"ideas\"]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/notes",
+          "host": ["{{base_url}}"],
+          "path": ["notes"]
+        },
+        "description": "Create a new note. Response includes id – set variable note_id for Update/Delete."
+      }
+    },
+    {
+      "name": "Update note",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{firebase_id_token}}", "type": "text" },
+          { "key": "Content-Type", "value": "application/json", "type": "text" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated title\",\n  \"content\": \"Updated content.\",\n  \"tags\": [\"work\", \"ideas\", \"updated\"]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/notes/{{note_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["notes", "{{note_id}}"]
+        },
+        "description": "Partial update. Set note_id variable first."
+      }
+    },
+    {
+      "name": "Delete note",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{firebase_id_token}}", "type": "text" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/notes/{{note_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["notes", "{{note_id}}"]
+        },
+        "description": "Delete a note. Set note_id variable first."
+      }
+    }
+  ]
+}
