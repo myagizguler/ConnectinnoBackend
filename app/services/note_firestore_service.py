@@ -42,16 +42,23 @@ def get_note(user_id: str, note_id: str) -> dict | None:
 
 
 def list_notes(user_id: str) -> list[dict]:
-    """List all notes for the given user, newest first (by created_at)."""
-    docs = list_documents_where(
-        COLLECTION,
-        USER_ID_FIELD,
-        user_id,
-    )
-    # Sort in Python to avoid requiring a Firestore composite index
+    """List all notes for the given user.
+
+    Ordering:
+    1. `is_pinned == True` notlar en üstte
+    2. Aynı pinned durumunda `created_at` en yeni en üstte
+    """
+    docs = list_documents_where(COLLECTION, USER_ID_FIELD, user_id)
+
+    # Python tarafında iki seviyeli sıralama:
+    # - Önce is_pinned (True > False)
+    # - Sonra created_at (yeni > eski)
     return sorted(
         docs,
-        key=lambda d: d.get("created_at") or _timestamp(),
+        key=lambda d: (
+            bool(d.get("is_pinned", False)),
+            d.get("created_at") or _timestamp(),
+        ),
         reverse=True,
     )
 
