@@ -42,8 +42,14 @@ def get_note(user_id: str, note_id: str) -> dict | None:
 
 
 def list_notes(user_id: str) -> list[dict]:
-    """List all notes for the given user."""
-    return list_documents_where(COLLECTION, USER_ID_FIELD, user_id)
+    """List all notes for the given user, newest first (by created_at)."""
+    return list_documents_where(
+        COLLECTION,
+        USER_ID_FIELD,
+        user_id,
+        order_by="created_at",
+        descending=True,
+    )
 
 
 def update_note(user_id: str, note_id: str, data: NoteUpdate) -> None:

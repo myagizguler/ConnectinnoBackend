@@ -3,6 +3,8 @@
 from datetime import datetime
 from typing import Any
 
+from firebase_admin import firestore
+
 from app.core.firebase import get_firestore
 
 
@@ -114,11 +116,19 @@ def list_documents_where(
     collection: str,
     field: str,
     value: Any,
+    order_by: str | None = None,
+    descending: bool = False,
 ) -> list[dict[str, Any]]:
     """
     List documents where field equals value (e.g. userId == uid).
+
+    Optionally order by a field (e.g. created_at) ascending or descending.
     :return: List of documents (each with id in the dict).
     """
     client = get_firestore()
-    query = client.collection(collection).where(field, "==", value).stream()
-    return [{"id": d.id, **d.to_dict()} for d in query]
+    query = client.collection(collection).where(field, "==", value)
+    if order_by:
+        direction = firestore.Query.DESCENDING if descending else firestore.Query.ASCENDING
+        query = query.order_by(order_by, direction=direction)
+    docs = query.stream()
+    return [{"id": d.id, **d.to_dict()} for d in docs]
